@@ -1,0 +1,1 @@
+Disclaimer: The predictions from NOAA Tide Predictions are based upon the latest information available as of the date of your request.
