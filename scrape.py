@@ -64,7 +64,7 @@ REGION_IDS =[
 ]
 
 
-def get_region_stations(region_id, harmonic_only=True):
+def get_region_stations(region_id, station_type="harmonic"):
     """
     Fetch a list of stations for a given region.
 
@@ -72,9 +72,9 @@ def get_region_stations(region_id, harmonic_only=True):
     ----------
     region_id : int
         NOAA region ID
-    harmonic_only : bool, optional
-        Whether to limit the output to only harmonic stations instead of including
-        both harmonic and subordinate, by default True
+    station_type : {"harmonic", "subordinate", "both"}, optional
+        Whether to limit the output to only harmonic stations, only subordinate
+        stations, or both. Defaults to "harmonic".
 
     Returns
     -------
@@ -85,8 +85,10 @@ def get_region_stations(region_id, harmonic_only=True):
     if response.status_code != 200:
         raise Exception(f"Response code {response.status_code}")
     data = response.json()["stationList"]
-    if harmonic_only:
+    if station_type == "harmonic":
         data = [i for i in data if i["stationType"] == "R"]
+    elif station_type == "subordinate":
+        data = [i for i in data if i["stationType"] == "S"]
     else:
         data = [i for i in data if i["stationType"] in ("S", "R")]
     return data
@@ -161,8 +163,8 @@ def skip(stn_id, year, month):
 
 
 if __name__ == "__main__":
-    region_id = 1415
-    stns = get_region_stations(region_id, harmonic_only=False)
+    region_id = 1409
+    stns = get_region_stations(region_id, station_type="both")
     start_year = 2025
     end_year = 2029 # inclusive
     years = range(start_year, end_year + 1)
