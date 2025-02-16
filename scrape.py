@@ -19,9 +19,9 @@ URL_TEMPLATE = ("https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cg
     "clock=12hour&type=txt&annual=false")
 
 
-REGION_IDS =[
-    1393, # California
-    1409, # Oregon
+ALL_REGION_IDS =[
+    # 1393, # California (only harmonic fetched)
+    # 1409, # Oregon
     # 1415, # Washington
     1391, # Alaska
     1401, # Maine
@@ -172,29 +172,35 @@ def skip(stn_id, year, month):
 
 
 if __name__ == "__main__":
-    region_id = 1393
-    stns = get_region_stations(region_id, station_type="harmonic")
-    with open(os.path.join("data", "stations.json"), "w") as f:
-        f.write(json.dumps(stns))
-    start_year = 2025
-    end_year = 2029 # inclusive
-    years = range(start_year, end_year + 1)
-    months = range(1, 12 + 1)
-    failed = []
-    for stn in stns:
-        for year in years:
-            for month in months:
-                if not skip(stn["stationId"], year, month):
-                    try:
-                        data, filename = get_month_data(stn, year, month)
-                        path = os.path.join("data", filename)
-                        if not os.path.exists(path):
-                            with open(path, "w") as f:
-                                f.write(data)
-                    except IndexError:
-                        failed.append((stn, year, month))
-                    except TypeError:
-                        failed.append((stn, year, month))
+    region_ids = [
+        (1391, "ak"),
+        (1401, "me"),
+        (1399, "hi")
+    ]
+    for region_id, state in region_ids:
+        folder_path = os.path.join("data", state)
+        if not os.path.exists(folder_path):
+            os.mkdir(folder_path)
+        stns = get_region_stations(region_id, station_type="harmonic")
+        with open(os.path.join(folder_path, "stations.json"), "w") as f:
+            f.write(json.dumps(stns))
+        start_year = 2025
+        end_year = 2029 # inclusive
+        years = range(start_year, end_year + 1)
+        months = range(1, 12 + 1)
+        failed = []
+        for stn in stns:
+            for year in years:
+                for month in months:
+                    if not skip(stn["stationId"], year, month):
+                        try:
+                            data, filename = get_month_data(stn, year, month)
+                            path = os.path.join(folder_path, filename)
+                            if not os.path.exists(path):
+                                with open(path, "w") as f:
+                                    f.write(data)
+                        except (IndexError, TypeError):
+                            failed.append((stn, year, month))
     print("DONE")
     print("The following fetches failed:")
     for i in failed:
