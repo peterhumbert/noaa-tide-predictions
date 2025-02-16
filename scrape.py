@@ -160,7 +160,14 @@ def skip(stn_id, year, month):
     bool
         Whether the fetch can be skipped
     """
-    return len(glob.glob(f"data/{calendar.month_name[month]} {year}*{stn_id} Tidal Data.txt")) > 0
+    return len(
+        glob.glob(
+            os.path.join(
+                "data",
+                f"{calendar.month_name[month]} {year}*{stn_id} Tidal Data.txt"
+            )
+        )
+    ) > 0
 
 
 if __name__ == "__main__":
