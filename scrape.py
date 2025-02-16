@@ -130,13 +130,14 @@ def get_month_data(stn, year, month, progress=True):
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Response text {response.text}")
-        raise Exception(f"Response code {response.status_code}")
+        return None, None
     try:
         station_name = [i for i in response.text.split("\n") if "StationName" in i][0][12:].strip()
     except IndexError as e:
         print(response.url)
-        raise e
+        return None, None
     filename = f"{calendar.month_name[month]} {year} {station_name}, {stn_id} Tidal Data.txt"
+    filename = filename.replace("/", "---")
     return response.text, filename
 
 
@@ -163,8 +164,8 @@ def skip(stn_id, year, month):
 
 
 if __name__ == "__main__":
-    region_id = 1409
-    stns = get_region_stations(region_id, station_type="both")
+    region_id = 1393
+    stns = get_region_stations(region_id, station_type="harmonic")
     start_year = 2025
     end_year = 2029 # inclusive
     years = range(start_year, end_year + 1)
@@ -181,6 +182,8 @@ if __name__ == "__main__":
                             with open(path, "w") as f:
                                 f.write(data)
                     except IndexError:
+                        failed.append((stn, year, month))
+                    except TypeError:
                         failed.append((stn, year, month))
     print("DONE")
     print("The following fetches failed:")
