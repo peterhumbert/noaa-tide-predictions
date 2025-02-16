@@ -1,6 +1,7 @@
 import calendar
 from calendar import monthrange
 import glob
+import json
 import os
 import requests
 
@@ -173,6 +174,8 @@ def skip(stn_id, year, month):
 if __name__ == "__main__":
     region_id = 1393
     stns = get_region_stations(region_id, station_type="harmonic")
+    with open(os.path.join("data", "stations.json"), "w") as f:
+        f.write(json.dumps(stns))
     start_year = 2025
     end_year = 2029 # inclusive
     years = range(start_year, end_year + 1)
