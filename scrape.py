@@ -6,17 +6,24 @@ import os
 import requests
 
 """
-Downloading .txt files with 6-minute tide predictions has the format...
-GET https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cgi?=&
-    stnid=9442705&threshold=&thresholdDirection=&bdate=20250501&edate=20250531&
-    units=standard&timezone=LST/LDT&datum=MLLW&interval=6&
-    clock=12hour&type=txt&annual=false
+Downloading .csv files with tide predictions has the format below. Default
+interval seems to be 6 minutes for harmonic stations. Have tested a
+1-year fetch.
+
+GET https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?
+    begin_date=20250221&end_date=20250225&station=9441187&
+    product=predictions&datum=MLLW&time_zone=lst_ldt&
+    units=english&format=json
+
+Valid formats are json, csv, and xml. The csv format downloads a
+.csv file.
 """
 
-URL_TEMPLATE = ("https://tidesandcurrents.noaa.gov/cgi-bin/predictiondownload.cgi?=&"
-    "stnid={stnid}&threshold=&thresholdDirection=&bdate={bdate}&edate={edate}&"
-    "units=standard&timezone=LST/LDT&datum=MLLW&interval={interval}&"
-    "clock=12hour&type=txt&annual=false")
+URL_TEMPLATE = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?"
+                  "begin_date={begin_date}&end_date={enddate}&station={stnid}&"
+                  "product=predictions&datum=MLLW&time_zone=lst_ldt&"
+                  "units=english&format=csv")
+
 
 
 ALL_REGION_IDS =[
@@ -173,7 +180,7 @@ def skip(stn_id, year, month):
 
 if __name__ == "__main__":
     region_ids = [
-        (1391, "ak"),
+        (1391, "ak"), # TODO: PARTIALLY COMPLETE
         (1401, "me"),
         (1399, "hi")
     ]
