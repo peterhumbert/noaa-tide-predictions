@@ -131,6 +131,8 @@ def get_year_data(stn, year, progress=True):
     begin_date = f"{year}0101"
     end_date = f"{year}1231"
     url = URL_TEMPLATE.format(stnid=stn_id, begin_date=begin_date, end_date=end_date)
+    if stn["stationType"] == "S":
+        url += "&interval=hilo"
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Response text {response.text}")
