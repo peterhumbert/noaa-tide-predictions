@@ -1,6 +1,5 @@
-import calendar
-from calendar import monthrange
 import glob
+import itertools
 import json
 import os
 import requests
@@ -20,7 +19,7 @@ Valid formats are json, csv, and xml. The csv format downloads a
 """
 
 URL_TEMPLATE = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?"
-                  "begin_date={begin_date}&end_date={enddate}&station={stnid}&"
+                  "begin_date={begin_date}&end_date={end_date}&station={stnid}&"
                   "product=predictions&datum=MLLW&time_zone=lst_ldt&"
                   "units=english&format=csv")
 
@@ -102,9 +101,9 @@ def get_region_stations(region_id, station_type="harmonic"):
     return data
 
 
-def get_month_data(stn, year, month, progress=True):
+def get_year_data(stn, year, progress=True):
     """
-    Fetch a single month of data for a single station.
+    Fetch a single year of data for a single station.
 
     Parameters
     ----------
@@ -112,8 +111,6 @@ def get_month_data(stn, year, month, progress=True):
         Station definition from the NOAA API
     year : int
         The 4-digit year
-    month : int
-        The 1- or 2-digit month, where the value 1 corresponds to January
     progress : bool, optional
         Whether or not to print a statement describing the fetch, by default True
 
@@ -128,28 +125,22 @@ def get_month_data(stn, year, month, progress=True):
         When the station name cannot be determined from the server response
     """
     stn_id = stn["stationId"]
-    interval = "6" if stn["stationType"] == "R" else "hilo"
+    stn_name = stn["geoGroupName"]
     if progress:
-        print(f"Working on {stn_id} for {month}/{year}")
-    _, last_day_of_month = monthrange(year, month)
-    bdate = f"{year}{str(month).zfill(2)}01"
-    edate = f"{year}{str(month).zfill(2)}{last_day_of_month}"
-    url = URL_TEMPLATE.format(stnid=stn_id, bdate=bdate, edate=edate, interval=interval)
+        print(f"Working on {stn_id} for {year}")
+    begin_date = f"{year}0101"
+    end_date = f"{year}1231"
+    url = URL_TEMPLATE.format(stnid=stn_id, begin_date=begin_date, end_date=end_date)
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Response text {response.text}")
         return None, None
-    try:
-        station_name = [i for i in response.text.split("\n") if "StationName" in i][0][12:].strip()
-    except IndexError as e:
-        print(response.url)
-        return None, None
-    filename = f"{calendar.month_name[month]} {year} {station_name}, {stn_id} Tidal Data.txt"
+    filename = f"{year} {stn_name} {stn_id} Tidal Data.csv"
     filename = filename.replace("/", "---")
     return response.text, filename
 
 
-def skip(stn_id, year, month):
+def skip(stn_id, state, year):
     """
     Determines whether a fetch can be skipped because data corresponding to the
     given station, year, and month already exists.
@@ -158,10 +149,10 @@ def skip(stn_id, year, month):
     ----------
     stn_id : int
         NOAA station ID
+    state : str
+        2-letter state abbreviation
     year : int
         The 4-digit year
-    month : int
-        The 1- or 2-digit month, where the value 1 corresponds to January
 
     Returns
     -------
@@ -172,7 +163,8 @@ def skip(stn_id, year, month):
         glob.glob(
             os.path.join(
                 "data",
-                f"{calendar.month_name[month]} {year}*{stn_id} Tidal Data.txt"
+                state,
+                f"{year}*{stn_id}*.csv"
             )
         )
     ) > 0
@@ -180,34 +172,32 @@ def skip(stn_id, year, month):
 
 if __name__ == "__main__":
     region_ids = [
-        (1391, "ak"), # TODO: PARTIALLY COMPLETE
-        (1401, "me"),
-        (1399, "hi")
+        (1415, "wa"),
+        # (1391, "ak"), # TODO: PARTIALLY COMPLETE
+        # (1401, "me"),
+        # (1399, "hi")
     ]
     for region_id, state in region_ids:
         folder_path = os.path.join("data", state)
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
-        stns = get_region_stations(region_id, station_type="harmonic")
+        stns = get_region_stations(region_id, station_type="both")
         with open(os.path.join(folder_path, "stations.json"), "w") as f:
             f.write(json.dumps(stns))
         start_year = 2025
         end_year = 2029 # inclusive
         years = range(start_year, end_year + 1)
-        months = range(1, 12 + 1)
         failed = []
-        for stn in stns:
-            for year in years:
-                for month in months:
-                    if not skip(stn["stationId"], year, month):
-                        try:
-                            data, filename = get_month_data(stn, year, month)
-                            path = os.path.join(folder_path, filename)
-                            if not os.path.exists(path):
-                                with open(path, "w") as f:
-                                    f.write(data)
-                        except (IndexError, TypeError):
-                            failed.append((stn, year, month))
+        for stn, year in itertools.product(stns, years):
+            if not skip(stn["stationId"], state, year):
+                try:
+                    data, filename = get_year_data(stn, year)
+                    path = os.path.join(folder_path, filename)
+                    if not os.path.exists(path):
+                        with open(path, "w") as f:
+                            f.write(data)
+                except (IndexError, TypeError):
+                    failed.append((stn, year))
     print("DONE")
     print("The following fetches failed:")
     for i in failed:
