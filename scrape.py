@@ -2,7 +2,9 @@ import glob
 import itertools
 import json
 import os
+import sys
 import requests
+import time
 
 """
 Downloading .csv files with tide predictions has the format below. Default
@@ -173,11 +175,14 @@ def skip(stn_id, state, year):
 
 
 if __name__ == "__main__":
+    t_end = None
+    if len(sys.argv) > 1:
+        t0 = time.time()
+        t_end = float(sys.argv[1])*3600 + t0
     region_ids = [
-        (1415, "wa"),
-        # (1391, "ak"), # TODO: PARTIALLY COMPLETE
-        # (1401, "me"),
-        # (1399, "hi")
+        (1391, "ak"), # TODO: PARTIALLY COMPLETE
+        (1401, "me"),
+        (1399, "hi")
     ]
     for region_id, state in region_ids:
         folder_path = os.path.join("data", state)
@@ -191,15 +196,16 @@ if __name__ == "__main__":
         years = range(start_year, end_year + 1)
         failed = []
         for stn, year in itertools.product(stns, years):
-            if not skip(stn["stationId"], state, year):
-                try:
-                    data, filename = get_year_data(stn, year)
-                    path = os.path.join(folder_path, filename)
-                    if not os.path.exists(path):
-                        with open(path, "w") as f:
-                            f.write(data)
-                except (IndexError, TypeError):
-                    failed.append((stn, year))
+            if t_end is None or time.time() < t_end:
+                if not skip(stn["stationId"], state, year):
+                    try:
+                        data, filename = get_year_data(stn, year)
+                        path = os.path.join(folder_path, filename)
+                        if not os.path.exists(path):
+                            with open(path, "w") as f:
+                                f.write(data)
+                    except (IndexError, TypeError):
+                        failed.append((stn, year))
     print("DONE")
     print("The following fetches failed:")
     for i in failed:
