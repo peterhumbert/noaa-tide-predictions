@@ -36,12 +36,12 @@ ALL_REGION_IDS =[
     # 1405, # New Hampshire
     # 1403, # Massachusetts
     # 1411, # Rhode Island
-    1394, # Connecticut
-    1407, # New York
-    1406, # New Jersey
-    1395, # Delaware
-    1410, # Pennsylvania
-    1402, # Maryland
+    # 1394, # Connecticut
+    # 1407, # New York
+    # 1406, # New Jersey
+    # 1395, # Delaware
+    # 1410, # Pennsylvania
+    # 1402, # Maryland
     1414, # Virginia
     1396, # Washington DC
     1408, # North Carolina
