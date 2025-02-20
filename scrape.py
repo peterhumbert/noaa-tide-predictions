@@ -1,6 +1,7 @@
 import glob
 import itertools
 import json
+from multiprocessing import Pool
 import os
 import sys
 import requests
@@ -31,8 +32,8 @@ ALL_REGION_IDS =[
     # 1393, # California (only harmonic fetched)
     # 1409, # Oregon
     # 1415, # Washington
-    1391, # Alaska
-    1401, # Maine
+    # 1391, # Alaska
+    # 1401, # Maine
     # 1405, # New Hampshire
     # 1403, # Massachusetts
     # 1411, # Rhode Island
@@ -42,10 +43,10 @@ ALL_REGION_IDS =[
     # 1395, # Delaware
     # 1410, # Pennsylvania
     # 1402, # Maryland
-    1414, # Virginia
-    1396, # Washington DC
-    1408, # North Carolina
-    1412, # South Carolina
+    # 1414, # Virginia
+    # 1396, # Washington DC
+    # 1408, # North Carolina
+    # 1412, # South Carolina
     1398, # Georgia
     1397, # Florida
     1392, # Alabama
@@ -56,7 +57,7 @@ ALL_REGION_IDS =[
     1848, # Palau
     1543, # Federated States of Micronesia
     1544, # Marshall Islands
-    1399, # Hawaii
+    # 1399, # Hawaii
     1484, # Kiribati
     1775, # Tokelau
     1771, # American Samoa
@@ -128,6 +129,8 @@ def get_year_data(stn, year, progress=True):
     """
     stn_id = stn["stationId"]
     stn_name = stn["geoGroupName"]
+    filename = f"{year} {stn_name} {stn_id} Tidal Data.csv"
+    filename = filename.replace("/", "---")
     if progress:
         print(f"Working on {stn_id} for {year}")
     begin_date = f"{year}0101"
@@ -138,9 +141,12 @@ def get_year_data(stn, year, progress=True):
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Response text {response.text}")
-        return None, None
-    filename = f"{year} {stn_name} {stn_id} Tidal Data.csv"
-    filename = filename.replace("/", "---")
+        return None, filename
+    folder_path = os.path.join("data", stn["state"])
+    path = os.path.join(folder_path, filename)
+    if not os.path.exists(path):
+        with open(path, "w") as f:
+            f.write(response.text)
     return response.text, filename
 
 
@@ -182,7 +188,11 @@ if __name__ == "__main__":
     region_ids = [
         (1391, "ak"), # TODO: PARTIALLY COMPLETE
         (1401, "me"),
-        (1399, "hi")
+        (1399, "hi"),
+        (1414, "va"), # Virginia
+        (1396, "dc"), # Washington DC
+        (1408, "nc"), # North Carolina
+        (1412, "sc"), # South Carolina
     ]
     failed = []
     for region_id, state in region_ids:
@@ -190,22 +200,21 @@ if __name__ == "__main__":
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
         stns = get_region_stations(region_id, station_type="both")
+        for stn in stns:
+            stn["state"] = state
         with open(os.path.join(folder_path, "stations.json"), "w") as f:
             f.write(json.dumps(stns))
         start_year = 2025
         end_year = 2029 # inclusive
         years = range(start_year, end_year + 1)
-        for stn, year in itertools.product(stns, years):
-            if t_end is None or time.time() < t_end:
-                if not skip(stn["stationId"], state, year):
-                    try:
-                        data, filename = get_year_data(stn, year)
-                        path = os.path.join(folder_path, filename)
-                        if not os.path.exists(path):
-                            with open(path, "w") as f:
-                                f.write(data)
-                    except (IndexError, TypeError):
-                        failed.append((stn, year))
+        fetches = itertools.product(stns, years)
+        fetches = [(stn, year) for stn, year in fetches if not skip(
+            stn["stationId"], stn["state"], year)]
+        with Pool(4) as p:
+            results = p.starmap(get_year_data, fetches)
+        for data, filename in results:
+            if data is None:
+                failed.append(filename)
     print("DONE")
     print("The following fetches failed:")
     for i in failed:
