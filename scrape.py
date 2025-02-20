@@ -32,8 +32,8 @@ ALL_REGION_IDS =[
     # 1393, # California (only harmonic fetched)
     # 1409, # Oregon
     # 1415, # Washington
-    1391, # Alaska
-    1401, # Maine
+    # 1391, # Alaska
+    # 1401, # Maine
     # 1405, # New Hampshire
     # 1403, # Massachusetts
     # 1411, # Rhode Island
@@ -43,10 +43,10 @@ ALL_REGION_IDS =[
     1395, # Delaware
     1410, # Pennsylvania
     1402, # Maryland
-    1414, # Virginia
-    1396, # Washington DC
-    1408, # North Carolina
-    1412, # South Carolina
+    # 1414, # Virginia
+    # 1396, # Washington DC
+    # 1408, # North Carolina
+    # 1412, # South Carolina
     1398, # Georgia
     1397, # Florida
     1392, # Alabama
@@ -57,7 +57,7 @@ ALL_REGION_IDS =[
     1848, # Palau
     1543, # Federated States of Micronesia
     1544, # Marshall Islands
-    1399, # Hawaii
+    # 1399, # Hawaii
     1484, # Kiribati
     1775, # Tokelau
     1771, # American Samoa
