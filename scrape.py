@@ -184,6 +184,7 @@ if __name__ == "__main__":
         (1401, "me"),
         (1399, "hi")
     ]
+    failed = []
     for region_id, state in region_ids:
         folder_path = os.path.join("data", state)
         if not os.path.exists(folder_path):
@@ -194,7 +195,6 @@ if __name__ == "__main__":
         start_year = 2025
         end_year = 2029 # inclusive
         years = range(start_year, end_year + 1)
-        failed = []
         for stn, year in itertools.product(stns, years):
             if t_end is None or time.time() < t_end:
                 if not skip(stn["stationId"], state, year):
