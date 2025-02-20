@@ -33,9 +33,9 @@ ALL_REGION_IDS =[
     # 1415, # Washington
     1391, # Alaska
     1401, # Maine
-    1405, # New Hampshire
-    1403, # Massachusetts
-    1411, # Rhode Island
+    # 1405, # New Hampshire
+    # 1403, # Massachusetts
+    # 1411, # Rhode Island
     1394, # Connecticut
     1407, # New York
     1406, # New Jersey
