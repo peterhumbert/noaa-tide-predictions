@@ -47,30 +47,30 @@ ALL_REGION_IDS =[
     # 1396, # Washington DC
     # 1408, # North Carolina
     # 1412, # South Carolina
-    1398, # Georgia
-    1397, # Florida
-    1392, # Alabama
-    1404, # Mississippi
-    1400, # Louisiana
-    1413, # Texas
-    1542, # Northern Marianas Islands
-    1848, # Palau
-    1543, # Federated States of Micronesia
-    1544, # Marshall Islands
+    # 1398, # Georgia
+    # 1397, # Florida
+    # 1392, # Alabama
+    # 1404, # Mississippi
+    # 1400, # Louisiana
+    # 1413, # Texas
+    # 1542, # Northern Marianas Islands
+    # 1848, # Palau
+    # 1543, # Federated States of Micronesia
+    # 1544, # Marshall Islands
     # 1399, # Hawaii
-    1484, # Kiribati
-    1775, # Tokelau
-    1771, # American Samoa
-    1482, # French Polynesia
-    1752, # Cook Islands
-    1483, # Fiji
-    1535, # Bermuda Islands
-    1536, # Bahamas
-    1537, # Cuba
-    1538, # Jamaica
-    1539, # Haiti and Dominican Republic
-    1540, # Puerto Rico
-    1541  # Lesser Antilles and Virgin Islands 
+    # (1484, "kiribati"), # Kiribati
+    # (1775, "tokelau"), # Tokelau
+    # (1771, "american-samoa"), # American Samoa
+    # (1482, "french-polynesia"), # French Polynesia
+    # (1752, "cook-islands"), # Cook Islands
+    # (1483, "fiji"), # Fiji
+    # (1535, "bermuda"), # Bermuda Islands
+    # (1536, "bahamas"), # Bahamas
+    # (1537, "cuba"), # Cuba
+    # (1538, "jamaica"), # Jamaica
+    # (1539, "haiti-dr"), # Haiti and Dominican Republic
+    # (1540, "pr"), # Puerto Rico
+    # (1541, "antilles-vi")  # Lesser Antilles and Virgin Islands 
 ]
 
 
@@ -185,15 +185,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         t0 = time.time()
         t_end = float(sys.argv[1])*3600 + t0
-    region_ids = [
-        (1391, "ak"), # TODO: PARTIALLY COMPLETE
-        (1401, "me"),
-        (1399, "hi"),
-        (1414, "va"), # Virginia
-        (1396, "dc"), # Washington DC
-        (1408, "nc"), # North Carolina
-        (1412, "sc"), # South Carolina
-    ]
+    region_ids = ALL_REGION_IDS
     failed = []
     for region_id, state in region_ids:
         folder_path = os.path.join("data", state)
