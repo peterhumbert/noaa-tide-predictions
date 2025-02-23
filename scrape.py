@@ -21,56 +21,59 @@ Valid formats are json, csv, and xml. The csv format downloads a
 .csv file.
 """
 
-URL_TEMPLATE = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?"
+TIDE_PREDICTION_URL = ("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?"
                   "begin_date={begin_date}&end_date={end_date}&station={stnid}&"
                   "product=predictions&datum=MLLW&time_zone=lst_ldt&"
                   "units=english&format=csv")
 
+SL_RISE_PROJECTION_URL = (
+    "https://api.tidesandcurrents.noaa.gov/dpapi/prod/webapi/product/"
+    "slr_projections.json?units=english&station={stnid}&report_year={year}"
+)
 
-
-ALL_REGION_IDS =[
-    # 1393, # California (only harmonic fetched)
-    # 1409, # Oregon
-    # 1415, # Washington
-    # 1391, # Alaska
-    # 1401, # Maine
-    # 1405, # New Hampshire
-    # 1403, # Massachusetts
-    # 1411, # Rhode Island
-    # 1394, # Connecticut
-    # 1407, # New York
-    # 1406, # New Jersey
-    # 1395, # Delaware
-    # 1410, # Pennsylvania
-    # 1402, # Maryland
-    # 1414, # Virginia
-    # 1396, # Washington DC
-    # 1408, # North Carolina
-    # 1412, # South Carolina
-    # 1398, # Georgia
-    # 1397, # Florida
-    # 1392, # Alabama
-    # 1404, # Mississippi
-    # 1400, # Louisiana
-    # 1413, # Texas
-    # 1542, # Northern Marianas Islands
-    # 1848, # Palau
-    # 1543, # Federated States of Micronesia
-    # 1544, # Marshall Islands
-    # 1399, # Hawaii
-    # (1484, "kiribati"), # Kiribati
-    # (1775, "tokelau"), # Tokelau
-    # (1771, "american-samoa"), # American Samoa
-    # (1482, "french-polynesia"), # French Polynesia
-    # (1752, "cook-islands"), # Cook Islands
-    # (1483, "fiji"), # Fiji
-    # (1535, "bermuda"), # Bermuda Islands
-    # (1536, "bahamas"), # Bahamas
-    # (1537, "cuba"), # Cuba
-    # (1538, "jamaica"), # Jamaica
-    # (1539, "haiti-dr"), # Haiti and Dominican Republic
-    # (1540, "pr"), # Puerto Rico
-    # (1541, "antilles-vi")  # Lesser Antilles and Virgin Islands 
+TIDE_PREDICTION_REGION_IDS =[
+    (1393, "ca"), # California (only harmonic fetched)
+    (1409, "or"), # Oregon
+    (1415, "wa"), # Washington
+    (1391, "ak"), # Alaska
+    (1401, "me"), # Maine
+    (1405, "nh"), # New Hampshire
+    (1403, "ma"), # Massachusetts
+    (1411, "ri"), # Rhode Island
+    (1394, "ct"), # Connecticut
+    (1407, "ny"), # New York
+    (1406, "nj"), # New Jersey
+    (1395, "de"), # Delaware
+    (1410, "pa"), # Pennsylvania
+    (1402, "md"), # Maryland
+    (1414, "va"), # Virginia
+    (1396, "dc"), # Washington DC
+    (1408, "nc"), # North Carolina
+    (1412, "sc"), # South Carolina
+    (1398, "ga"), # Georgia
+    (1397, "fl"), # Florida
+    (1392, "al"), # Alabama
+    (1404, "ms"), # Mississippi
+    (1400, "la"), # Louisiana
+    (1413, "tx"), # Texas
+    (1542, "marianas"), # Northern Marianas Islands
+    (1848, "palau"), # Palau
+    (1543, "micronesia"), # Federated States of Micronesia
+    (1544, "marshall"), # Marshall Islands
+    (1399, "hi"), # Hawaii
+    (1484, "kiribati"), # Kiribati
+    (1775, "tokelau"), # Tokelau
+    (1771, "american-samoa"), # American Samoa
+    (1482, "french-polynesia"), # French Polynesia
+    (1752, "cook-islands"), # Cook Islands
+    (1483, "fiji"), # Fiji
+    (1535, "bermuda"), # Bermuda Islands
+    (1536, "bahamas"), # Bahamas
+    (1537, "cuba"), # Cuba
+    (1538, "jamaica"), # Jamaica
+    (1539, "haiti-dr"), # Haiti and Dominican Republic
+    (1540, "pr"), # Puerto Rico
+    (1541, "antilles-vi")  # Lesser Antilles and Virgin Islands 
 ]
 
 
@@ -135,7 +138,7 @@ def get_year_data(stn, year, progress=True):
         print(f"Working on {stn_id} for {year}")
     begin_date = f"{year}0101"
     end_date = f"{year}1231"
-    url = URL_TEMPLATE.format(stnid=stn_id, begin_date=begin_date, end_date=end_date)
+    url = TIDE_PREDICTION_URL.format(stnid=stn_id, begin_date=begin_date, end_date=end_date)
     if stn["stationType"] == "S":
         url += "&interval=hilo"
     response = requests.get(url)
@@ -185,7 +188,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         t0 = time.time()
         t_end = float(sys.argv[1])*3600 + t0
-    region_ids = ALL_REGION_IDS
+    region_ids = TIDE_PREDICTION_REGION_IDS
     failed = []
     for region_id, state in region_ids:
         folder_path = os.path.join("data", state)
