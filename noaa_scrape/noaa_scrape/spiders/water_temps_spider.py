@@ -13,7 +13,7 @@ class NOAADataAPISpider(scrapy.Spider):
     url = ""
     stations_url = ""
     start_year = 1990
-    type = TIME_DATA_MONTHLY
+    time_type = TIME_DATA_MONTHLY
 
     @property
     def save_dir(self):
@@ -21,7 +21,7 @@ class NOAADataAPISpider(scrapy.Spider):
     
     def get_time_periods(self) -> tuple[date, date]:
         time_periods = []
-        if self.type == self.TIME_DATA_MONTHLY:
+        if self.time_type == self.TIME_DATA_MONTHLY:
             years = range(self.start_year, 2025) # exclude 2025
             months = (list(itertools.product(years, range(1, 13)))
                             + [(2025, 1), (2025, 2)])
@@ -74,5 +74,5 @@ class WaterTempSpider(NOAADataAPISpider):
         "type=watertemp&expand=details&units=english"
     )
     start_year = 1990
-    type = NOAADataAPISpider.TIME_DATA_MONTHLY
+    time_type = NOAADataAPISpider.TIME_DATA_MONTHLY
         
