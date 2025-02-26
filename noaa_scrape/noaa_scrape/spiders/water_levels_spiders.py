@@ -21,6 +21,6 @@ class MonthlyMeanWaterLevelSpider(BasicNOAASpider):
     )
     stations_url = (
         "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?"
-        "type=waterlevels&units=english"
+        "type=historicwl&units=english"
     )
 
